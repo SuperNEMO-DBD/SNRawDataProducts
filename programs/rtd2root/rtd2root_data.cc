@@ -16,7 +16,6 @@ namespace snfee {
       has_trig = false;
       nb_calo_hits = 0;
       nb_tracker_hits = 0;
-      return;
     }
 
     // static
@@ -70,6 +69,9 @@ namespace snfee {
           chit.get_channel_data(0).get_rising_cell();
         out_.calo_ch0_falling_cell[calo_count] =
           chit.get_channel_data(0).get_falling_cell();
+        out_.calo_ch0_lt_trigger_counter[calo_count] =
+          chit.get_lt_trigger_counter(0);
+        out_.calo_ch0_lt_time_counter[calo_count] = chit.get_lt_time_counter(0);
 
         out_.calo_ch1_lt[calo_count] = chit.get_channel_data(1).is_lt();
         out_.calo_ch1_ht[calo_count] = chit.get_channel_data(1).is_ht();
@@ -88,6 +90,9 @@ namespace snfee {
           chit.get_channel_data(1).get_rising_cell();
         out_.calo_ch1_falling_cell[calo_count] =
           chit.get_channel_data(1).get_falling_cell();
+        out_.calo_ch1_lt_trigger_counter[calo_count] =
+          chit.get_lt_trigger_counter(1);
+        out_.calo_ch1_lt_time_counter[calo_count] = chit.get_lt_time_counter(1);
 
         const snfee::data::calo_hit_record::waveforms_record& waveforms =
           chit.get_waveforms();
@@ -121,7 +126,6 @@ namespace snfee {
         tracker_count++;
       }
 
-      return;
     }
 
   } // namespace data

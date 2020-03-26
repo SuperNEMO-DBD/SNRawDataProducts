@@ -46,7 +46,7 @@ namespace snfee {
 
       //! Constructor
       raw_record_parser(const config_type& cfg_,
-                        const datatools::logger::priority logging_ =
+                        const datatools::logger::priority l_ =
                           datatools::logger::PRIO_FATAL);
 
       datatools::logger::priority get_logging() const;
@@ -60,7 +60,7 @@ namespace snfee {
       //! Parse
       record_type parse(std::istream& in_,
                         snfee::data::calo_hit_record& calo_hit_,
-                        snfee::data::tracker_hit_record& tracker_channel_hit_);
+                        snfee::data::tracker_hit_record& tracker_hit_);
 
     private:
       void _parse_hit_header_(const std::string& header_line_, const int index);
@@ -77,9 +77,10 @@ namespace snfee {
         _calo_hit_parser_; //!< Handler for the calo hit parser
       std::unique_ptr<tracker_hit_parser>
         _tracker_hit_parser_;    //!< Handler for the tracker hit parser
-      uint64_t _hit_id_;         //!< Current hit ID
+      int32_t _sw_hit_id_;       //!< Current hit ID
+      int32_t _hit_number_;      //!< Current hit number
       record_type _record_type_; //!< Current record type
-      uint64_t _trigger_id_;     //!< Current trigger ID
+      int32_t _trigger_id_;      //!< Current trigger ID
     };
 
   } // namespace io

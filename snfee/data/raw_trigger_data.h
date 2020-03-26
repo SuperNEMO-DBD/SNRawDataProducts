@@ -42,12 +42,6 @@ namespace snfee {
     class raw_trigger_data : public datatools::i_tree_dumpable,
                              public datatools::i_serializable {
     public:
-      /// Default constructor
-      raw_trigger_data();
-
-      /// Destructor
-      virtual ~raw_trigger_data();
-
       /// Check if the record is complete
       bool is_complete() const;
 
@@ -62,9 +56,9 @@ namespace snfee {
       /// poptions.put("indent", ">>> ");
       /// myCaloData.print_tree(std::clog, poptions);
       /// \endcode
-      virtual void print_tree(std::ostream& out_ = std::clog,
-                              const boost::property_tree::ptree& options_ =
-                                empty_options()) const override;
+      virtual void print_tree(
+        std::ostream& out_ = std::clog,
+        const boost::property_tree::ptree& options_ = empty_options()) const;
 
       //! Reset the record
       void invalidate();

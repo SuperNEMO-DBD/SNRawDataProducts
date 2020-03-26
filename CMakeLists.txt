@@ -61,11 +61,16 @@ add_library(SNRawDataProducts SHARED
   snfee/data/channel_id.cc
   snfee/data/channel_id.h
   snfee/data/has_trigger_id_interface.h
+  snfee/data/raw_event_data.cc
+  snfee/data/raw_event_data.h
+  snfee/data/raw_record_interface.h
   snfee/data/raw_trigger_data.cc
   snfee/data/raw_trigger_data.h
   snfee/data/run_info-serial.h
   snfee/data/run_info.cc
   snfee/data/run_info.h
+  snfee/data/time.cc
+  snfee/data/time.h
   snfee/data/tracker_hit_record.cc
   snfee/data/tracker_hit_record.h
   snfee/data/trigger_record.cc

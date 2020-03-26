@@ -30,72 +30,82 @@ main(int argc_, char** argv_)
   try {
     app_params_type app_params;
 
-    // clang-format off
     // Parse options:
     namespace po = boost::program_options;
     po::options_description opts("Allowed options");
-    opts.add_options()
-      ("help,h", "produce help message")
+    opts.add_options()("help,h", "produce help message")
 
       ("logging,L",
        po::value<std::string>()->value_name("level"),
        "logging priority")
 
-      ("input-list,l",
-       po::value<std::string>(&app_params.converter_cfg.input_rtd_listname)
-       ->value_name("path"),
-       "set a list of RTD input filenames")
+        ("input-list,l",
+         po::value<std::string>(&app_params.converter_cfg.input_rtd_listname)
+           ->value_name("path"),
+         "set a list of RTD input filenames")
 
-      ("input-file,i",
-       po::value<std::vector<std::string>>(&app_params.converter_cfg.input_rtd_filenames)
-       ->multitoken()
-       ->value_name("path"),
-       "add a RTD input filename")
+          ("input-file,i",
+           po::value<std::vector<std::string>>(
+             &app_params.converter_cfg.input_rtd_filenames)
+             ->multitoken()
+             ->value_name("path"),
+           "add a RTD input filename")
 
-      ("output-file,o",
-       po::value<std::string>(&app_params.converter_cfg.output_root_filename)
-       ->value_name("path"),
-       "set the Root output filename")
+            ("output-file,o",
+             po::value<std::string>(
+               &app_params.converter_cfg.output_root_filename)
+               ->value_name("path"),
+             "set the Root output filename")
 
-      ("max-total-records,M",
-       po::value<std::size_t>(&app_params.converter_cfg.max_total_records)
-       ->value_name("number")->default_value(0),
-       "set the maximum number of RTD records to be converted (default: 0, unused")
+              ("max-total-records,M",
+               po::value<std::size_t>(
+                 &app_params.converter_cfg.max_total_records)
+                 ->value_name("number")
+                 ->default_value(0),
+               "set the maximum number of RTD records to be converted "
+               "(default: 0, unused")
 
-//      ("calo-select-crate,C",
-//       po::value<int16_t>(&app_params.converter_cfg.calo_sel_config.crate_num)
-//       ->value_name("id"),
-//       "set a specific crate number (0-2) for calorimeter hit record selection")
-//
-//      ("calo-select-board,B",
-//       po::value<int16_t>(&app_params.converter_cfg.calo_sel_config.board_num)
-//       ->value_name("id"),
-//       "set a specific board number (0-9,11-20) for calorimeter hit record selection")
-//
-//      ("calo-select-chip,H",
-//       po::value<int16_t>(&app_params.converter_cfg.calo_sel_config.chip_num)
-//       ->value_name("id"),
-//       "set a specific chip number (0-7) for calorimeter hit record selection")
-//
-//      ("calo-select-reverse,V",
-//       po::value<bool>(&app_params.converter_cfg.calo_sel_config.reverse)
-//       ->zero_tokens()->default_value(false),
-//       "reverse the calorimeter hit selection")
+                ("calo-select-crate,C",
+                 po::value<int16_t>(
+                   &app_params.converter_cfg.calo_sel_config.crate_num)
+                   ->value_name("id"),
+                 "set a specific crate number (0-2) for calorimeter hit record "
+                 "selection")
 
-    ; // end of options description
-    // clang-format on
+                  ("calo-select-board,B",
+                   po::value<int16_t>(
+                     &app_params.converter_cfg.calo_sel_config.board_num)
+                     ->value_name("id"),
+                   "set a specific board number (0-9,11-20) for calorimeter "
+                   "hit record selection")
+
+                    ("calo-select-chip,H",
+                     po::value<int16_t>(
+                       &app_params.converter_cfg.calo_sel_config.chip_num)
+                       ->value_name("id"),
+                     "set a specific chip number (0-7) for calorimeter hit "
+                     "record selection")
+
+                      ("calo-select-reverse,V",
+                       po::value<bool>(
+                         &app_params.converter_cfg.calo_sel_config.reverse)
+                         ->zero_tokens()
+                         ->default_value(false),
+                       "reverse the calorimeter hit selection")
+
+      ; // end of options description
 
     // Describe command line arguments :
     po::variables_map vm;
     po::store(po::command_line_parser(argc_, argv_).options(opts).run(), vm);
     po::notify(vm);
 
-    // clang-format off
     // Use command line arguments :
-    if (vm.count("help")) {
+    if (vm.count("help") != 0U) {
       std::cout << "snfee-rtd2root : "
                 << "Convert raw trigger data file (RTD) to a Root file"
-                << std::endl << std::endl;
+                << std::endl
+                << std::endl;
       std::cout << "Usage : " << std::endl << std::endl;
       std::cout << "  snfee-rtd2root [OPTIONS]" << std::endl << std::endl;
       std::cout << opts << std::endl;
@@ -112,13 +122,10 @@ main(int argc_, char** argv_)
       std::cout << std::endl << std::endl;
       return (-1);
     }
-    // clang-format on
 
     // Use command line arguments :
-    if (vm.count("logging")) {
+    if (vm.count("logging") != 0U) {
       std::string logging_repr = vm["logging"].as<std::string>();
-      // DT_LOG_DEBUG(datatools::logger::PRIO_DEBUG, "Logging repr. = '" <<
-      // logging_repr << "'");
       app_params.logging = datatools::logger::get_priority(logging_repr);
       DT_THROW_IF(app_params.logging == datatools::logger::PRIO_UNDEFINED,
                   std::logic_error,
@@ -128,7 +135,7 @@ main(int argc_, char** argv_)
 
     // Checks:
     DT_THROW_IF(app_params.converter_cfg.input_rtd_listname.empty() and
-                  app_params.converter_cfg.input_rtd_filenames.size() == 0,
+                  app_params.converter_cfg.input_rtd_filenames.empty(),
                 std::logic_error,
                 "Missing input RTD filenames!");
     DT_THROW_IF(app_params.converter_cfg.output_root_filename.empty(),

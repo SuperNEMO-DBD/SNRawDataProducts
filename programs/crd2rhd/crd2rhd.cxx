@@ -33,7 +33,6 @@ struct app_params_type {
   snfee::io::raw_hit_reader::config_type reader_config;
   std::string input_listname;
   std::vector<std::string> input_filenames;
-  // std::vector<std::string> output_filenames;
   std::string output_filename;
   bool dynamic_output_files = false;
   std::size_t max_rhd_files = 1;
@@ -79,50 +78,52 @@ main(int argc_, char** argv_)
       ("input-file,i",
        po::value<std::vector<std::string>>(&app_params.input_filenames)
        ->value_name("path"),
-       "add an RHD input filename")
+       "add an CRD input filename")
 
       ("output-file,o",
-       po::value<std::string>(& app_params.output_filename)
+       po::value<std::string>(&app_params.output_filename)
        ->value_name("path"),
        "set the RHD output filename or filename pattern")
 
       ("crate-number,c",
-       po::value<int16_t>(& app_params.reader_config.crate_num)
+       po::value<int16_t>(&app_params.reader_config.crate_num)
        ->value_name("number"),
        "set the crate number (0, 1 or 2)")
 
       ("max-records,m",
-       po::value<std::size_t>(& app_params.writer_config.max_total_records)
+       po::value<std::size_t>(
+       &app_params.writer_config.max_total_records)
        ->value_name("number")
        ->default_value(0),
-       "set the maximum total number of collected RHD records")
+       "set the maximum total number of output RHD records")
 
       ("max-records-per-file,f",
-       po::value<std::size_t>(& app_params.writer_config.max_records_per_file)
+       po::value<std::size_t>(
+       &app_params.writer_config.max_records_per_file)
        ->value_name("number")
        ->default_value(0),
-       "set the maximum number of collected RHD records per file")
+       "set the maximum number of output RHD records per file")
 
       ("max-output-files,M",
-       po::value<std::size_t>(& app_params.max_rhd_files)
+       po::value<std::size_t>(&app_params.max_rhd_files)
        ->value_name("number")
        ->default_value(1),
        "set the maximum number of RHD output files")
 
       ("dynamic-output-files,Y",
-       po::value<bool>(& app_params.dynamic_output_files)
+       po::value<bool>(&app_params.dynamic_output_files)
        ->zero_tokens()
        ->default_value(false),
        "allow to dynamically add more RHD output files as needed")
 
       ("allow-overrun,O",
-       po::value<bool>(& app_params.writer_config.terminate_on_overrun)
+       po::value<bool>(&app_params.writer_config.terminate_on_overrun)
        ->zero_tokens()
        ->default_value(false),
        "allow data writer overrun (expert)")
 
       ("print-records,P",
-       po::value<bool>(& app_params.print_records)
+       po::value<bool>(&app_params.print_records)
        ->zero_tokens()
        ->default_value(false),
        "print records (debug only)")
@@ -134,9 +135,9 @@ main(int argc_, char** argv_)
        "force trigger IDs and ignore those from CRD input files (expert)")
 
       ("session-id,S",
-       po::value<int32_t>(& app_params.session_id)
+       po::value<int32_t>(&app_params.session_id)
        ->default_value(0),
-        "set the session ID (expert)")
+       "set the session ID (expert)")
 
       ("work-dir,W",
        po::value<std::string>(& app_params.work_dir)
@@ -159,7 +160,7 @@ main(int argc_, char** argv_)
     po::notify(vm);
 
     // Use command line arguments :
-    if (vm.count("help")) {
+    if (vm.count("help") != 0U) {
       std::cout << "snfee-crd2rhd : "
                 << "Convert commissioning raw data file (CRD) to official raw "
                    "hit data file (RHD)"
@@ -194,7 +195,7 @@ main(int argc_, char** argv_)
     }
 
     // Use command line arguments :
-    if (vm.count("logging")) {
+    if (vm.count("logging") != 0U) {
       std::string logging_repr = vm["logging"].as<std::string>();
       // DT_LOG_DEBUG(datatools::logger::PRIO_DEBUG, "Logging repr. = '" <<
       // logging_repr << "'");
@@ -204,7 +205,7 @@ main(int argc_, char** argv_)
                   "Invalid logging priority '"
                     << vm["logging"].as<std::string>() << "'!");
     }
-    if (vm.count("reader-logging")) {
+    if (vm.count("reader-logging") != 0U) {
       std::string logging_repr = vm["reader-logging"].as<std::string>();
       // DT_LOG_DEBUG(datatools::logger::PRIO_DEBUG, "Logging repr. = '" <<
       // logging_repr << "'");
@@ -265,7 +266,7 @@ main(int argc_, char** argv_)
       std::string basename;
       // Extract output file:
       {
-        std::size_t basename_pos = app_params.output_filename.find_last_of("/");
+        std::size_t basename_pos = app_params.output_filename.find_last_of('/');
         basename = app_params.output_filename;
         if (basename_pos != std::string::npos) {
           dirpath = app_params.output_filename.substr(0, basename_pos);
@@ -391,7 +392,7 @@ main(int argc_, char** argv_)
       DT_LOG_INFORMATION(datatools::logger::PRIO_INFORMATION,
                          "Reading CRD input file : '" +
                            app_params.reader_config.input_filename + "'");
-      // Reader for RHD data file (for the commissioning phase using the SN
+      // Reader for CRD data file (for the commissioning phase using the SN
       // CRATE SOFTWARE acquisition program):
       snfee::io::raw_hit_reader reader;
       reader.set_logging(app_params.reader_logging);
@@ -447,23 +448,25 @@ main(int argc_, char** argv_)
           DT_LOG_INFORMATION(datatools::logger::PRIO_INFORMATION,
                              "Loaded CRD records: " << crd_counter);
         }
-        if (app_params.writer_config.max_total_records and
+        if (app_params.writer_config.max_total_records != 0U and
             crd_counter == app_params.writer_config.max_total_records) {
           DT_LOG_INFORMATION(datatools::logger::PRIO_INFORMATION,
                              "Max CRD records reached!");
           end_of_input_for_this_file = true;
           end_of_input = true;
         }
-        if (app_params.max_crd_per_input_file and
+        if (app_params.max_crd_per_input_file != 0U and
             crd_counter_for_this_file == app_params.max_crd_per_input_file) {
           DT_LOG_INFORMATION(datatools::logger::PRIO_INFORMATION,
                              "Max CRD records per input file reached!");
           end_of_input_for_this_file = true;
         }
-        if (end_of_input)
+        if (end_of_input) {
           break;
-        if (end_of_input_for_this_file)
+        }
+        if (end_of_input_for_this_file) {
           break;
+        }
         if (pWriter) {
           if (app_params.dynamic_output_files && pWriter->is_last_file()) {
             output_file_part_num++;
@@ -482,8 +485,9 @@ main(int argc_, char** argv_)
         }
       } // end of reader loop:
       reader.reset();
-      if (end_of_input)
+      if (end_of_input) {
         break;
+      }
     } // end of input file loop.
 
     if (app_params.force_fake_trigger_ids) {
